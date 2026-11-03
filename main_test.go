@@ -110,7 +110,7 @@ func TestListenerCanSubscribeInsideItsHandler(t *testing.T) {
 	reg := NewRegistry[Event]()
 	late := &recorder{}
 	reg.Subscribe(BookingCreated, &joiner{reg: reg, late: late})
-	reg.Publish(bookingEvent("Bob", 1)) // joiner adds "late" here, late must not see this one
+	reg.Publish(bookingEvent("Bob", 1))
 	reg.Publish(bookingEvent("Bob", 2))
 	if late.count() != 1 {
 		t.Fatalf("late listener should get only the second event, got %d", late.count())
@@ -119,7 +119,7 @@ func TestListenerCanSubscribeInsideItsHandler(t *testing.T) {
 
 func TestPublishWithoutListenersIsFine(t *testing.T) {
 	reg := NewRegistry[Event]()
-	reg.Publish(bookingEvent("Bob", 1)) // must not panic
+	reg.Publish(bookingEvent("Bob", 1))
 }
 
 func TestRevenueManagerRepublishesBatchSum(t *testing.T) {
@@ -156,7 +156,6 @@ func TestGuestAppConfirmsOnceAndLeaves(t *testing.T) {
 
 func TestRevenueWholeHotel(t *testing.T) {
 	hotel, _ := buildHotel()
-	// F1: 100 + 500 + 1000 = 1600, F2: 120 + 300 + 400 = 820, F3: 350 + 0 = 350
 	if got := Run[float64](hotel, &RevenueVisitor{}); got != 2770 {
 		t.Fatalf("want 2770, got %v", got)
 	}
@@ -171,7 +170,6 @@ func TestRevenueOfOneFloorOnly(t *testing.T) {
 
 func TestOccupancyReport(t *testing.T) {
 	hotel, _ := buildHotel()
-	// rooms and suites: 101 102 201 202 210 301 302 = 7, occupied: 101 201 210 302 = 4
 	got := Run[OccupancyReport](hotel, &OccupancyVisitor{})
 	if got.Total != 7 || got.Occupied != 4 {
 		t.Fatalf("want 4 of 7, got %d of %d", got.Occupied, got.Total)
@@ -226,8 +224,6 @@ func TestMaxRateVisitor(t *testing.T) {
 		t.Fatalf("want 350, got %v", got)
 	}
 }
-
-// ---- Integration test ----
 
 func TestCheckoutsTriggerCleaningPlanOfThatFloorOnly(t *testing.T) {
 	sys := NewSystem()
@@ -309,7 +305,6 @@ func TestConcurrentCheckoutsGiveExactAlertCount(t *testing.T) {
 	if got := sys.Stats.Count(CleaningPlan); got != 1200 {
 		t.Errorf("plans: want 1200, got %d", got)
 	}
-	// the front desk gets every alert and every plan
 	if got := len(sys.FrontDesk.Messages()); got != 2400 {
 		t.Errorf("front desk messages: want 2400, got %d", got)
 	}
